@@ -375,13 +375,14 @@ void double_star::dump(ostream & s, bool brief) {
 
       if(bin_type!=Merged) {
 
-      int n_elements = no_of_elements();
+      //int n_elements = no_of_elements(); // Gijs March26: 2 stars are printed in this dump so better to make that clear at the start of the dump
+      int n_elements = 2;
 
       s << n_elements
         << "\n " << identity
 	<< " " << bin_type
         << " " << binary_age
-        << " " << bin_type
+        << " " << current_mass_transfer_type
         << " " << eccentricity
         << " " << get_period()
         << " " << semi
@@ -1280,28 +1281,29 @@ void double_star::recursive_binary_evolution(real dt,
 
       // Primary fills Roche-lobe?
       if (rp >= rl_p) {
-	get_primary()->set_spec_type(Rl_filling);
-	get_primary()->set_spec_type(Accreting, false);
-	get_secondary()->set_spec_type(Accreting);
+	      get_primary()->set_spec_type(Rl_filling);
+	      get_primary()->set_spec_type(Accreting, false);
+	      get_secondary()->set_spec_type(Accreting);
+        donor->set_effective_radius(rl_p);
       }
       else
-	get_primary()->set_spec_type(Rl_filling, false);
+	      get_primary()->set_spec_type(Rl_filling, false);
 
       if (rs >= rl_s) {
 
-	// secondary is donor
-	donor  = get_secondary();
-	accretor = get_primary();
+	    // secondary is donor
+	      donor  = get_secondary();
+	      accretor = get_primary();
 
-	get_secondary()->set_spec_type(Rl_filling);
-	get_secondary()->set_spec_type(Accreting, false);
-	get_primary()->set_spec_type(Accreting);
-
-	// One could check here for contact binary to cause
-	// the secondary to be the donor.
+	      get_secondary()->set_spec_type(Rl_filling);
+	      get_secondary()->set_spec_type(Accreting, false);
+	      get_primary()->set_spec_type(Accreting);
+        donor->set_effective_radius(rl_s);
+	      // One could check here for contact binary to cause
+	      // the secondary to be the donor.
       }
       else
-	get_secondary()->set_spec_type(Rl_filling, false);
+	      get_secondary()->set_spec_type(Rl_filling, false);
 
 
 //  Determines if we really have to do with a mass
@@ -1333,7 +1335,7 @@ void double_star::recursive_binary_evolution(real dt,
 	  // (SilT Nov 25 2012)
    	  // Goes wrong when first stable mass transfer. Need to set in ::contact_binary...
       // bin_type = Contact;
-	  // first_contact=true;
+	    first_contact=true;
 
 	    if (REPORT_RECURSIVE_EVOLUTION)
 	      cerr << "\tFirst contact" << endl;
@@ -1488,6 +1490,7 @@ void double_star::recursive_binary_evolution(real dt,
 	  set_effective_radius(get_secondary()->get_radius());
 
 	current_mass_transfer_type = Unknown;
+  first_contact = false;
 
 	refresh_memory();
 
